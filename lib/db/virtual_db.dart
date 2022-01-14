@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class VirtualDB {
   List<Map<String, dynamic>> items = [];
   static final VirtualDB _db = VirtualDB._privateConstructor();
@@ -9,6 +11,7 @@ class VirtualDB {
   }
 
   Future<void> insert(Map<String, dynamic> item) async {
+    item['id'] = Random().nextInt(1000);
     items.add(item);
   }
 
@@ -22,7 +25,7 @@ class VirtualDB {
   }
 
   Future<List<Map<String, dynamic>>> list() async {
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 800));
     return items;
   }
 

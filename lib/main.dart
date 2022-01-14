@@ -4,16 +4,17 @@ import 'package:repo_bookstore/controllers/home.dart';
 import 'package:repo_bookstore/models/book.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(HomePage());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
+class HomePage extends StatefulWidget {
   final HomeController _homeController = HomeController();
+  
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,7 +23,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Repo Book Store'),
         ),
         body: ListView(
-          children: [_createForm(), _createDataTable()],
+          children: [_createForm(), _createBookTable()],
         ),
       ),
     );
@@ -73,8 +74,8 @@ class _MyAppState extends State<MyApp> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      await _homeController.addBook(Book(
-                          10,
+                      await widget._homeController.addBook(Book(
+                          0,
                           _titleFieldController.text,
                           int.parse(_yearFieldController.text)));
                       setState(() {});
@@ -88,21 +89,21 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _createDataTable() {
+  Widget _createBookTable() {
     return FutureBuilder<List<Book>>(
-        future: _homeController.getAllBooks(),
+        future: widget._homeController.getAllBooks(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: Text('Loading..'));
           } else {
             return DataTable(
-                columns: _createColumns(),
-                rows: _createRows(snapshot.data ?? []));
+                columns: _createBookTableColumns(),
+                rows: _createBookTableRows(snapshot.data ?? []));
           }
         });
   }
 
-  List<DataColumn> _createColumns() {
+  List<DataColumn> _createBookTableColumns() {
     return [
       const DataColumn(label: Text('ID')),
       const DataColumn(label: Text('Book')),
@@ -110,7 +111,7 @@ class _MyAppState extends State<MyApp> {
     ];
   }
 
-  List<DataRow> _createRows(List<Book> books) {
+  List<DataRow> _createBookTableRows(List<Book> books) {
     return books
         .map((book) => DataRow(cells: [
               DataCell(Text('#' + book.id.toString())),
@@ -118,7 +119,7 @@ class _MyAppState extends State<MyApp> {
               DataCell(IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () async {
-                  await _homeController.removeBook(book.id);
+                  await widget._homeController.removeBook(book.id);
                   setState(() {});
                 },
               )),

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:repo_bookstore/db/virtual_db.dart';
 import 'package:repo_bookstore/repositories/book.dart';
 import 'package:repo_bookstore/models/book.dart';
@@ -11,7 +10,6 @@ class HomeController {
   }
 
   Future<void> addBook(Book book) {
-    book.id = Random().nextInt(100);
     return _bookRepo.insert(book);
   }
 
