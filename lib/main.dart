@@ -4,36 +4,67 @@ import 'package:repo_bookstore/controllers/home.dart';
 import 'package:repo_bookstore/models/book.dart';
 
 void main() {
-  runApp(HomePage());
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Repo Book Store'),
+          ),
+          body: HomePage()),
+    );
+  }
 }
 
 class HomePage extends StatefulWidget {
   final HomeController _homeController = HomeController();
-  
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Repo Book Store'),
-        ),
-        body: ListView(
-          children: [_createForm(), _createBookTable()],
-        ),
-      ),
-    );
+  void _refreshList() {
+    setState(() {});
   }
 
-  Form _createForm() {
-    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    final TextEditingController _titleFieldController = TextEditingController();
-    final TextEditingController _yearFieldController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return ListView(children: [
+      _Form(widget._homeController, _refreshList),
+      _BookTable(widget._homeController, _refreshList)
+    ]);
+  }
+}
 
+class _Form extends StatefulWidget {
+  final HomeController _homeController;
+  final VoidCallback _refreshList;
+
+  _Form(this._homeController, this._refreshList);
+
+  @override
+  _FormState createState() => _FormState();
+}
+
+class _FormState extends State<_Form> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleFieldController = TextEditingController();
+  final TextEditingController _yearFieldController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleFieldController.dispose();
+    _yearFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Form(
       key: _formKey,
       child: Container(
@@ -78,7 +109,9 @@ class _HomePageState extends State<HomePage> {
                           0,
                           _titleFieldController.text,
                           int.parse(_yearFieldController.text)));
-                      setState(() {});
+                      _titleFieldController.clear();
+                      _yearFieldController.clear();
+                      widget._refreshList();
                     }
                   },
                   child: Text('Add book'),
@@ -88,10 +121,18 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
 
-  Widget _createBookTable() {
+class _BookTable extends StatelessWidget {
+  final HomeController _homeController;
+  final VoidCallback _refreshList;
+
+  _BookTable(this._homeController, this._refreshList);
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<List<Book>>(
-        future: widget._homeController.getAllBooks(),
+        future: _homeController.getAllBooks(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: Text('Loading..'));
@@ -119,12 +160,11 @@ class _HomePageState extends State<HomePage> {
               DataCell(IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () async {
-                  await widget._homeController.removeBook(book.id);
-                  setState(() {});
+                  await _homeController.removeBook(book.id);
+                  _refreshList();
                 },
               )),
             ]))
         .toList();
   }
 }
-
